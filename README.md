@@ -12,4 +12,3 @@
 
 **To Do:**
 - [ ] Recreate Unit Tests
-- [ ] Create small console demo program
