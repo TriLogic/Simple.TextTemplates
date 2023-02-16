@@ -12,8 +12,8 @@
     <RepositoryUrl>https://github.com/TriLogic/Simple.TextTemplates</RepositoryUrl>
     <PackageTags>templates,template-engine</PackageTags>
     <Copyright>Copyright 2019 Trilogic Industries, LLC</Copyright>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
-    <FileVersion>1.0.1</FileVersion>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <FileVersion>1.1.0</FileVersion>
     <Version>$(FileVersion)</Version>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
   </PropertyGroup>
