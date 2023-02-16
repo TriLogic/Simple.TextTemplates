@@ -14,6 +14,7 @@
     <Copyright>Copyright 2019 Trilogic Industries, LLC</Copyright>
     <AssemblyVersion>1.0.1</AssemblyVersion>
     <FileVersion>1.0.1</FileVersion>
+    <Version>$(FileVersion)</Version>
   </PropertyGroup>
 
   <ItemGroup>
