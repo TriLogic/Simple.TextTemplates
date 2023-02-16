@@ -12,6 +12,13 @@ namespace Simple.TextTemplates
             _pattern = pattern ?? new StringBuilder();
         }
 
+        public StringBuilderTextSource(string pattern)
+        {
+            _pattern = string.IsNullOrEmpty(pattern) 
+                ? new StringBuilder() 
+                : new StringBuilder(pattern);
+        }
+
         public int Length { get { return _pattern.Length; } }
 
         public char this[int index]

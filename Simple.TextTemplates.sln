@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.TextTemplates", "Simple.TextTemplates\Simple.TextTemplates.csproj", "{EC1266EC-15D3-4B4A-B3A8-4A279F10370A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simple.TextTemplates", "Simple.TextTemplates\Simple.TextTemplates.csproj", "{EC1266EC-15D3-4B4A-B3A8-4A279F10370A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.TextTemplates.DemoApp", "Simple.TextTemplates.DemoApp\Simple.TextTemplates.DemoApp.csproj", "{49238D04-077C-4F15-932E-B97A1017E87E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{EC1266EC-15D3-4B4A-B3A8-4A279F10370A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC1266EC-15D3-4B4A-B3A8-4A279F10370A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC1266EC-15D3-4B4A-B3A8-4A279F10370A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49238D04-077C-4F15-932E-B97A1017E87E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49238D04-077C-4F15-932E-B97A1017E87E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49238D04-077C-4F15-932E-B97A1017E87E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49238D04-077C-4F15-932E-B97A1017E87E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
