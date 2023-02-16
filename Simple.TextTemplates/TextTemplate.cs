@@ -5,7 +5,7 @@ using System.Text;
 namespace Simple.TextTemplates
 {
     #region Tag Lookup Delegate
-    public delegate string TagLookup(string Key);
+    public delegate string? TagLookup(string Key);
     #endregion
 
     public class TextTemplate
@@ -13,7 +13,7 @@ namespace Simple.TextTemplates
         #region Class members
         private ITextSource mSource = new StringTextSource();
         private List<TemplateToken> mTokens = new List<TemplateToken>();
-        private Stack<TemplateToken> mStack = new Stack<TemplateToken>();
+        // private Stack<TemplateToken> mStack = new Stack<TemplateToken>();
         #endregion
 
         #region Constructors & Destructors
@@ -34,27 +34,24 @@ namespace Simple.TextTemplates
             get { return mSource; }
             set { mSource = value; }
         }
-
-        internal Stack<TemplateToken> Stack
-        {
-            get { return mStack; }
-        }
         #endregion
 
         #region Replace Tags
-        public void ReplaceTags(StringBuilder target, TagLookup provider)
+        public void ReplaceTags(StringBuilder target, TagLookup lookup)
         {
+            // moved the run stack to local to allow multiple threads
+            // of execution to access the functionality.
+            Stack<TemplateToken> stack = new();
+
             StringBuilder keyBuilder = new StringBuilder();
 
             // Clear the stack
-            mStack.Clear();
+            stack.Clear();
 
-            // assign an default provider
-            if (provider == null)
+            // assign a default lookup
+            if (lookup == null)
             {
-                provider = delegate (string key) {
-                    return $"[{key}]";
-                };
+                lookup = (string key) => $"[{key}]";
             }
 
             // Process the tokens
@@ -64,14 +61,14 @@ namespace Simple.TextTemplates
                 if (tkn.IsTXT)
                 {
                     // Nothing on the stack so copy this text directly to the target
-                    if (mStack.Count == 0)
+                    if (stack.Count == 0)
                     {
                         target.Append(mSource.Substring(tkn.TokenOffset, tkn.TokenLength));
                     }
                     else
                     {
                         // This text is intended to be part of a key or a complete key value.
-                        mStack.Peek().TokenLength += tkn.TokenLength;
+                        stack.Peek().TokenLength += tkn.TokenLength;
                         keyBuilder.Append(mSource.Substring(tkn.TokenOffset, tkn.TokenLength));
                     }
                     continue;
@@ -82,8 +79,7 @@ namespace Simple.TextTemplates
                 {
                     // Push a clone of the token  to the top of the stack. The tokens
                     // offset is the current length of the keyValue StringBuilder.
-                    mStack.Push(tkn.Clone(keyBuilder.Length, 0));
-
+                    stack.Push(tkn.Clone(keyBuilder.Length, 0));
                     continue;
                 }
 
@@ -92,11 +88,11 @@ namespace Simple.TextTemplates
                 {
                     // If TOS token is not a LHT then we have a mismatch error on the tag strcuture,
                     // furthermore if the length of the tag is zero then we have an empty tag.
-                    if (mStack.Count < 1 || !mStack.Peek().IsLHT || mStack.Peek().TokenLength == 0)
+                    if (stack.Count < 1 || !stack.Peek().IsLHT || stack.Peek().TokenLength == 0)
                         throw new Exception($"Invalid template: mismatch at offset {tkn.TokenOffset}");
 
                     // Retrieve the key value for the current token
-                    TemplateToken keyToken = mStack.Pop();
+                    TemplateToken keyToken = stack.Pop();
                     string keyValue = keyBuilder.ToString(keyToken.TokenOffset, keyToken.TokenLength);
 
                     // Remove the key value text from the keyBuilder
@@ -104,14 +100,14 @@ namespace Simple.TextTemplates
 
                     // Ask the value provider for the value that corresponds to the current key.
                     // It is now the job of the provider to throw an error if that's approriate.
-                    string txtValue = provider(keyValue) ?? string.Empty;
+                    string txtValue = lookup(keyValue) ?? string.Empty;
 
                     // If the value returned has length
                     // non-empty stack indicates we are working on a compound key
-                    if (mStack.Count > 0)
+                    if (stack.Count > 0)
                     {
                         keyBuilder.Append(txtValue);
-                        mStack.Peek().TokenLength += txtValue.Length;
+                        stack.Peek().TokenLength += txtValue.Length;
                     }
                     else
                     {
@@ -121,8 +117,35 @@ namespace Simple.TextTemplates
             }
 
             // If the stack is not empty we have a mismatch somewhere in the template
-            if (mStack.Count != 0)
+            if (stack.Count != 0)
                 throw new Exception($"Invalid template: mismatch");
+        }
+
+        public StringBuilder ReplaceTags(TagLookup lookup)
+        {
+            StringBuilder target = new();
+            ReplaceTags(target, lookup);
+            return target;
+        }
+
+        public StringBuilder ReplaceTags(Dictionary<string, string> values, string? onMissing = null, bool ignoreCase = true)
+        {
+            TagLookup caseLookup = (string key) => { 
+                if (values.ContainsKey(key))
+                    return values[key];
+                return values.ContainsKey(key)
+                    ? values[key]
+                    : onMissing;
+            };
+            TagLookup icaseLookup = (string key) => {
+                var ikey = values.Keys.Where(x => string.Compare(x, key, StringComparison.CurrentCultureIgnoreCase) == 0).FirstOrDefault();
+                return ikey == null
+                    ? onMissing
+                    : values[ikey];
+            };
+
+            var lookup = ignoreCase ? icaseLookup : caseLookup;
+            return ReplaceTags(lookup);
         }
         #endregion
 
@@ -154,7 +177,7 @@ namespace Simple.TextTemplates
             }
 
             // Return new textTemplate
-            return new TextTemplate
+            return new TextTemplate()
             {
                 mSource = source,
                 mTokens = tokens

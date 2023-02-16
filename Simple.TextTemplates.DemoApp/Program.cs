@@ -14,11 +14,20 @@ var template = TestTemplate.CompileTemplate();
 List<string> places = new() { "Town", "City", "State", "Country", "World", "Solar System", "Galaxy" };
 var target = new StringBuilder();
 
+// Using the template multiple times.
 places.ForEach(place =>
 {
+    target.Clear();
     template.ReplaceTags(target, (string tag) => place);
     Console.WriteLine(target);
-    target.Clear();
+});
+Console.WriteLine();
+
+// Using the template in parallel
+Parallel.ForEach(places, place =>
+{
+    var result = template.ReplaceTags((string tag) => place);
+    Console.WriteLine(result);
 });
 Console.WriteLine();
 
