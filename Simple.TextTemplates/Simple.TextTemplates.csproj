@@ -4,6 +4,23 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Title>Simple.TextTemplates</Title>
+    <Description>An easy to use library for generating output from templates that contain embedded tags.</Description>
+    <Authors>Andrew Friedl</Authors>
+    <Company>Trilogic Industries, LLC</Company>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/TriLogic/Simple.TextTemplates</RepositoryUrl>
+    <PackageTags>templates,template-engine</PackageTags>
+    <Copyright>Copyright 2019 Trilogic Industries, LLC</Copyright>
+    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <FileVersion>1.0.1</FileVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
