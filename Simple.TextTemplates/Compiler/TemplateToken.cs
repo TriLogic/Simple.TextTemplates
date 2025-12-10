@@ -10,61 +10,88 @@ namespace Simple.TextTemplates
         TkRHT = 3
     }
 
+
     public class TemplateToken
     {
         #region Class Members
-        public TemplateTokenType TokenType;
-        public int TokenOffset;
-        public int TokenLength;
+        public TemplateTokenType _type;
+        public int _offset;
+        public int _length;
         #endregion
 
-        #region Constructors and Destructors
         public TemplateToken()
         {
-            TokenType = TemplateTokenType.TkNIL;
+            _type = TemplateTokenType.TkNIL;
+            _offset = 0;
+            _length = 0;
         }
-        public TemplateToken(TemplateTokenType type, int offset)
+
+        public TemplateToken(TemplateTokenType type)
         {
-            TokenType = type;
-            TokenOffset = offset;
+            _type = type;
+            _offset = 0;
+            _length = 0;
         }
         public TemplateToken(TemplateTokenType type, int offset, int length)
         {
-            TokenType = type;
-            TokenOffset = offset;
-            TokenLength = length;
+            _type = type;
+            _offset = offset;
+            _length = length;
+        }
+
+        #region Helper Methods
+        public virtual void SetTXT(int offset, int length)
+        {
+            _type = TemplateTokenType.TkTXT;
+            _offset = offset;
+            _length = length;
+        }
+        public void SetLHT(int offset, int length)
+        {
+            _type = TemplateTokenType.TkLHT;
+            _offset = offset;
+            _length = length;
+        }
+        public void SetRHT(int offset, int length)
+        {
+            _type = TemplateTokenType.TkLHT;
+            _offset = offset;
+            _length = length;
+        }
+        public void SetNIL()
+        {
+            _type = TemplateTokenType.TkNIL;
+            _offset = 0;
+            _length = 0;
         }
         #endregion
 
-        #region Helper Methods
-        public void SetTXT(int offset, int length)
+        #region Properties
+        public TemplateTokenType TokenType { get => _type; set => _type = value; }
+        public int TokenOffset { get => _offset; set => _offset = value; }
+        public int TokenLength { get => _length; set => _length = value; }
+        public bool IsNIL
         {
-            TokenType = TemplateTokenType.TkTXT;
-            TokenOffset = offset;
-            TokenLength = length;
+            get { return _type == TemplateTokenType.TkNIL; }
         }
 
-        public void SetLHT(int offset)
+        public bool IsLHT
         {
-            TokenType = TemplateTokenType.TkLHT;
-            TokenOffset = offset;
-            TokenLength = 2;
+            get { return _type == TemplateTokenType.TkLHT; }
         }
 
-        public void SetRHT(int offset)
+        public bool IsTXT
         {
-            TokenType = TemplateTokenType.TkLHT;
-            TokenOffset = offset;
-            TokenLength = 1;
+            get { return _type == TemplateTokenType.TkTXT; }
         }
 
-        public void SetNIL()
+        public bool IsRHT
         {
-            TokenType = TemplateTokenType.TkNIL;
-            TokenOffset = 0;
-            TokenLength = 0;
+            get { return _type == TemplateTokenType.TkRHT; }
         }
+        #endregion
 
+        #region Cloning
         public TemplateToken Clone()
         {
             return new TemplateToken(TokenType, TokenOffset, TokenLength);
@@ -79,26 +106,6 @@ namespace Simple.TextTemplates
         }
         #endregion
 
-        #region Properties
-        public bool IsNIL
-        {
-            get { return TokenType == TemplateTokenType.TkNIL; }
-        }
-
-        public bool IsLHT
-        {
-            get { return TokenType == TemplateTokenType.TkLHT; }
-        }
-
-        public bool IsTXT
-        {
-            get { return TokenType == TemplateTokenType.TkTXT; }
-        }
-
-        public bool IsRHT
-        {
-            get { return TokenType == TemplateTokenType.TkRHT; }
-        }
-        #endregion
     }
+
 }

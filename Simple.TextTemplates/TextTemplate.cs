@@ -13,7 +13,6 @@ namespace Simple.TextTemplates
         #region Class members
         private ITextSource mSource = new StringTextSource();
         private List<TemplateToken> mTokens = new List<TemplateToken>();
-        // private Stack<TemplateToken> mStack = new Stack<TemplateToken>();
         #endregion
 
         #region Constructors & Destructors
@@ -152,7 +151,7 @@ namespace Simple.TextTemplates
         #region Static Compile Method
         public static TextTemplate Compile(ITextSource source)
         {
-            List<TemplateToken> tokens = TagTokenizer.Tokenize(source);
+            List<TemplateToken> tokens = StringTagTokenizer.Tokenize(source);
             Stack<TemplateToken> stack = new Stack<TemplateToken>();
 
             foreach (TemplateToken token in tokens)

@@ -3,12 +3,11 @@ using System.Text;
 
 namespace Simple.TextTemplates
 {
-    internal class TagTokenizer
+    public abstract class TagTokenizer
     {
         #region Class Members
-        ITextSource mBuf;
-
-        int mIdx = 0;
+        protected ITextSource mBuf;
+        protected int mIdx = 0;
         #endregion
 
         #region Constructors and Destructors
@@ -21,13 +20,55 @@ namespace Simple.TextTemplates
         #region Reset
         public void Reset(ITextSource buf)
         {
-            mBuf = buf;
-            mIdx = 0;
+            this.mBuf = buf;
+            this.mIdx = 0;
         }
         #endregion
 
+        #region Abstract Methods
+        public abstract TemplateToken? GetToken();
+        #endregion
+
+        #region Get Tokens
+        public virtual List<TemplateToken> GetTokens()
+        {
+            List<TemplateToken> list = new List<TemplateToken>();
+            TemplateToken? token;
+            while ((token = GetToken()) != null)
+                list.Add(token);
+            return list;
+        }
+        public virtual List<TemplateToken> GetTokens(ITextSource pattern)
+        {
+            Reset(pattern);
+            return GetTokens();
+        }
+        public virtual List<TemplateToken> GetTokens(string pattern)
+        {
+            Reset(new StringTextSource(pattern));
+            return GetTokens();
+        }
+        public virtual List<TemplateToken> GetTokens(StringBuilder pattern)
+        {
+            Reset(new StringBuilderTextSource(pattern));
+            return GetTokens();
+        }
+        public virtual List<TemplateToken> GetTokens(char[] pattern)
+        {
+            Reset(new CharArrayTextSource(pattern));
+            return GetTokens();
+        }
+        #endregion
+    }
+
+    public class StringTagTokenizer : TagTokenizer
+    {
+        #region Constructors and Destructors
+        public StringTagTokenizer(ITextSource buf) : base(buf) { }
+        #endregion
+
         #region Token Retreival
-        public TemplateToken GetToken()
+        public override TemplateToken? GetToken()
         {
             int offst = mIdx;
             int chars = 0;
@@ -89,52 +130,127 @@ namespace Simple.TextTemplates
             return null;
         }
 
-        public List<TemplateToken> GetTokens()
+        public static List<TemplateToken> Tokenize(ITextSource pattern)
         {
-            List<TemplateToken> list = new List<TemplateToken>();
-            TemplateToken token;
-            while ((token = GetToken()) != null)
-                list.Add(token);
-            return list;
+            return new StringTagTokenizer(pattern).GetTokens();
         }
-        public List<TemplateToken> GetTokens(ITextSource pattern)
+        public static List<TemplateToken> Tokenize(string pattern)
         {
-            Reset(pattern);
-            return GetTokens();
+            return new StringTagTokenizer(new StringTextSource(pattern)).GetTokens();
         }
-        public List<TemplateToken> GetTokens(string pattern)
+        public static List<TemplateToken> Tokenize(StringBuilder pattern)
         {
-            Reset(new StringTextSource(pattern));
-            return GetTokens();
+            return new StringTagTokenizer(new StringBuilderTextSource(pattern)).GetTokens();
         }
-        public List<TemplateToken> GetTokens(StringBuilder pattern)
+        public static List<TemplateToken> Tokenize(char[] pattern)
         {
-            Reset(new StringBuilderTextSource(pattern));
-            return GetTokens();
+            return new StringTagTokenizer(new CharArrayTextSource(pattern)).GetTokens();
         }
-        public List<TemplateToken> GetTokens(char[] pattern)
+        #endregion
+    }
+
+    public class HandlebarTagTokenizer : TagTokenizer
+    {
+        #region Class Members
+        ITextSource mBuf;
+
+        int mIdx = 0;
+        #endregion
+
+        #region Constructors and Destructors
+        public HandlebarTagTokenizer(ITextSource buf) : base(buf) { }
+        #endregion
+
+        #region Token Retreival
+        public override TemplateToken? GetToken()
         {
-            Reset(new CharArrayTextSource(pattern));
-            return GetTokens();
+            int offst = mIdx;
+            int chars = 0;
+
+            while (mIdx < mBuf.Length)
+            {
+                char tkc = mBuf[mIdx];
+
+                // LHT - Close (allow fall through on single '{')
+                if (tkc == '{' && mIdx + 1 < mBuf.Length && mBuf[mIdx + 1] == '{')
+                {
+                    // we have a start token but let used chars take precedence
+                    if (chars > 0)
+                    {
+                        // 1. Create the token result
+                        // 3. Do not increase the index, reprocess the existing one
+                        // 4. Return the result
+                        var result = new TemplateToken(TemplateTokenType.TkTXT, offst, chars);
+                        return result;
+                    }
+
+                    // there were no chars use so return a left hand token
+                    mIdx += 2;
+                    return new TemplateToken(TemplateTokenType.TkRHT, offst, 2);
+                }
+
+                // RHT - Close (allow fall through on single '}')
+                if (tkc == '}' && mIdx + 1 < mBuf.Length && mBuf[mIdx + 1] == '}')
+                {
+                    // we have an end token but let used chars take precedence
+                    if (chars > 0)
+                    {
+                        // 1. Create the token result
+                        // 3. Do not increase the index, reprocess the existing one
+                        // 4. Return ther result
+                        var result = new TemplateToken(TemplateTokenType.TkTXT, offst, chars);
+                        return result;
+                    }
+
+                    // this is a left hand token
+                    mIdx += 2;
+                    return new TemplateToken(TemplateTokenType.TkRHT, offst, 2);
+                }
+
+                // Possible Escape \{ or \}
+                if (tkc == '\\' && mIdx + 1 < mBuf.Length && (mBuf[mIdx + 1] == '{' || mBuf[mIdx + 1] == '}'))
+                {
+                    // stored chars take precedence
+                    if (chars > 0)
+                        return new TemplateToken(TemplateTokenType.TkTXT, offst, chars);
+
+                    // it is an escaped \{ or \} so move past it to allow it to become part of the text
+                    mIdx += 2;
+                    chars += 2;
+                    continue;
+                }
+
+                // processing a single char, add it to the list and move on
+                chars++;
+                mIdx++;
+            }
+
+            // if we have a token value
+            if (chars > 0)
+                return new TemplateToken(TemplateTokenType.TkTXT, offst, chars);
+
+            // No more tokens
+            return null;
         }
 
         public static List<TemplateToken> Tokenize(ITextSource pattern)
         {
-            return new TagTokenizer(pattern).GetTokens();
+            return new HandlebarTagTokenizer(pattern).GetTokens();
         }
         public static List<TemplateToken> Tokenize(string pattern)
         {
-            return new TagTokenizer(new StringTextSource(pattern)).GetTokens();
+            return new HandlebarTagTokenizer(new StringTextSource(pattern)).GetTokens();
         }
         public static List<TemplateToken> Tokenize(StringBuilder pattern)
         {
-            return new TagTokenizer(new StringBuilderTextSource(pattern)).GetTokens();
+            return new HandlebarTagTokenizer(new StringBuilderTextSource(pattern)).GetTokens();
         }
         public static List<TemplateToken> Tokenize(char[] pattern)
         {
-            return new TagTokenizer(new CharArrayTextSource(pattern)).GetTokens();
+            return new HandlebarTagTokenizer(new CharArrayTextSource(pattern)).GetTokens();
         }
-
         #endregion
     }
+
+
 }
