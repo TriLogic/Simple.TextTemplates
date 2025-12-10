@@ -17,13 +17,16 @@ namespace Simple.TextTemplates
         public TemplateTokenType _type;
         public int _offset;
         public int _length;
+        public bool _escaped;
         #endregion
 
+        #region Constructors
         public TemplateToken()
         {
             _type = TemplateTokenType.TkNIL;
             _offset = 0;
             _length = 0;
+            _escaped = false;
         }
 
         public TemplateToken(TemplateTokenType type)
@@ -31,13 +34,16 @@ namespace Simple.TextTemplates
             _type = type;
             _offset = 0;
             _length = 0;
+            _escaped = false;
         }
-        public TemplateToken(TemplateTokenType type, int offset, int length)
+        public TemplateToken(TemplateTokenType type, int offset, int length, bool escaped = false)
         {
             _type = type;
             _offset = offset;
             _length = length;
+            _escaped = escaped;
         }
+        #endregion
 
         #region Helper Methods
         public virtual void SetTXT(int offset, int length)
@@ -72,22 +78,28 @@ namespace Simple.TextTemplates
         public int TokenLength { get => _length; set => _length = value; }
         public bool IsNIL
         {
-            get { return _type == TemplateTokenType.TkNIL; }
+            get => _type == TemplateTokenType.TkNIL;
         }
 
         public bool IsLHT
         {
-            get { return _type == TemplateTokenType.TkLHT; }
+            get => _type == TemplateTokenType.TkLHT;
         }
 
         public bool IsTXT
         {
-            get { return _type == TemplateTokenType.TkTXT; }
+            get => _type == TemplateTokenType.TkTXT;
         }
 
         public bool IsRHT
         {
-            get { return _type == TemplateTokenType.TkRHT; }
+            get => _type == TemplateTokenType.TkRHT;
+        }
+
+        public bool IsEscaped
+        {
+            get => _escaped;
+            set => _escaped = value;
         }
         #endregion
 
@@ -105,7 +117,6 @@ namespace Simple.TextTemplates
             return new TemplateToken(TokenType, offset, length);
         }
         #endregion
-
     }
 
 }

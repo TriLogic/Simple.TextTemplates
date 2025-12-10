@@ -8,6 +8,13 @@ namespace Simple.TextTemplates
     public delegate string? TagLookup(string Key);
     #endregion
 
+    public enum TagStyle
+    {
+        StringBraces,
+        Handlebars
+    }
+
+
     public class TextTemplate
     {
         #region Class members
@@ -62,7 +69,14 @@ namespace Simple.TextTemplates
                     // Nothing on the stack so copy this text directly to the target
                     if (stack.Count == 0)
                     {
-                        target.Append(mSource.Substring(tkn.TokenOffset, tkn.TokenLength));
+                        if (tkn.IsEscaped)
+                        {
+                            target.Append(mSource.Substring(tkn.TokenOffset + 1, 1));
+                        }
+                        else
+                        {
+                            target.Append(mSource.Substring(tkn.TokenOffset, tkn.TokenLength));
+                        }
                     }
                     else
                     {
@@ -149,9 +163,10 @@ namespace Simple.TextTemplates
         #endregion
 
         #region Static Compile Method
-        public static TextTemplate Compile(ITextSource source)
+        public static TextTemplate Compile(ITextSource source, TagStyle style = TagStyle.StringBraces)
         {
-            List<TemplateToken> tokens = StringTagTokenizer.Tokenize(source);
+            List<TemplateToken> tokens = style == TagStyle.StringBraces ? 
+                StringTagTokenizer.Tokenize(source) : HandlebarTagTokenizer.Tokenize(source);
             Stack<TemplateToken> stack = new Stack<TemplateToken>();
 
             foreach (TemplateToken token in tokens)
