@@ -2,8 +2,8 @@
 using Simple.TextTemplates;
 using Simple.TextTemplates.Extensions;
 
-const string StringTemplate = "Hello $${ ${place} $}!";
-const string HandlebarTemplate = "Hello \\{ {{place}} \\}!";
+const string StringTemplate = "Hello from $${ ${place} $}!";
+const string HandlebarTemplate = "Hello from \\{\\{ {{place}} \\}\\}!";
 
 // Simple single string template with replace.
 Console.WriteLine(StringTemplate.ReplaceTags((string tag) => "World", TagStyle.StringBraces));
@@ -19,7 +19,13 @@ var target = new StringBuilder();
 places.ForEach(place =>
 {
     target.Clear();
-    template.ReplaceTags(target, (string tag) => place);
+    template.ReplaceTags(target, (string tag) =>
+    {
+        // This is the lookup function that translates tags to values.
+        // You can put whatever you want in here.
+        var result = tag.Trim() + ": " + place;
+        return result;
+    });
     Console.WriteLine(target);
 });
 Console.WriteLine();
