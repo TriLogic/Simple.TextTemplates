@@ -10,61 +10,100 @@ namespace Simple.TextTemplates
         TkRHT = 3
     }
 
+
     public class TemplateToken
     {
         #region Class Members
-        public TemplateTokenType TokenType;
-        public int TokenOffset;
-        public int TokenLength;
+        public TemplateTokenType _type;
+        public int _offset;
+        public int _length;
+        public bool _escaped;
         #endregion
 
-        #region Constructors and Destructors
+        #region Constructors
         public TemplateToken()
         {
-            TokenType = TemplateTokenType.TkNIL;
+            _type = TemplateTokenType.TkNIL;
+            _offset = 0;
+            _length = 0;
+            _escaped = false;
         }
-        public TemplateToken(TemplateTokenType type, int offset)
+
+        public TemplateToken(TemplateTokenType type)
         {
-            TokenType = type;
-            TokenOffset = offset;
+            _type = type;
+            _offset = 0;
+            _length = 0;
+            _escaped = false;
         }
-        public TemplateToken(TemplateTokenType type, int offset, int length)
+        public TemplateToken(TemplateTokenType type, int offset, int length, bool escaped = false)
         {
-            TokenType = type;
-            TokenOffset = offset;
-            TokenLength = length;
+            _type = type;
+            _offset = offset;
+            _length = length;
+            _escaped = escaped;
         }
         #endregion
 
         #region Helper Methods
-        public void SetTXT(int offset, int length)
+        public virtual void SetTXT(int offset, int length)
         {
-            TokenType = TemplateTokenType.TkTXT;
-            TokenOffset = offset;
-            TokenLength = length;
+            _type = TemplateTokenType.TkTXT;
+            _offset = offset;
+            _length = length;
         }
-
-        public void SetLHT(int offset)
+        public void SetLHT(int offset, int length)
         {
-            TokenType = TemplateTokenType.TkLHT;
-            TokenOffset = offset;
-            TokenLength = 2;
+            _type = TemplateTokenType.TkLHT;
+            _offset = offset;
+            _length = length;
         }
-
-        public void SetRHT(int offset)
+        public void SetRHT(int offset, int length)
         {
-            TokenType = TemplateTokenType.TkLHT;
-            TokenOffset = offset;
-            TokenLength = 1;
+            _type = TemplateTokenType.TkLHT;
+            _offset = offset;
+            _length = length;
         }
-
         public void SetNIL()
         {
-            TokenType = TemplateTokenType.TkNIL;
-            TokenOffset = 0;
-            TokenLength = 0;
+            _type = TemplateTokenType.TkNIL;
+            _offset = 0;
+            _length = 0;
+        }
+        #endregion
+
+        #region Properties
+        public TemplateTokenType TokenType { get => _type; set => _type = value; }
+        public int TokenOffset { get => _offset; set => _offset = value; }
+        public int TokenLength { get => _length; set => _length = value; }
+        public bool IsNIL
+        {
+            get => _type == TemplateTokenType.TkNIL;
         }
 
+        public bool IsLHT
+        {
+            get => _type == TemplateTokenType.TkLHT;
+        }
+
+        public bool IsTXT
+        {
+            get => _type == TemplateTokenType.TkTXT;
+        }
+
+        public bool IsRHT
+        {
+            get => _type == TemplateTokenType.TkRHT;
+        }
+
+        public bool IsEscaped
+        {
+            get => _escaped;
+            set => _escaped = value;
+        }
+        #endregion
+
+        #region Cloning
         public TemplateToken Clone()
         {
             return new TemplateToken(TokenType, TokenOffset, TokenLength);
@@ -78,27 +117,6 @@ namespace Simple.TextTemplates
             return new TemplateToken(TokenType, offset, length);
         }
         #endregion
-
-        #region Properties
-        public bool IsNIL
-        {
-            get { return TokenType == TemplateTokenType.TkNIL; }
-        }
-
-        public bool IsLHT
-        {
-            get { return TokenType == TemplateTokenType.TkLHT; }
-        }
-
-        public bool IsTXT
-        {
-            get { return TokenType == TemplateTokenType.TkTXT; }
-        }
-
-        public bool IsRHT
-        {
-            get { return TokenType == TemplateTokenType.TkRHT; }
-        }
-        #endregion
     }
+
 }

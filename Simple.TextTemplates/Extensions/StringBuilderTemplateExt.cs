@@ -10,16 +10,16 @@ namespace Simple.TextTemplates.Extensions
             return new StringBuilderTextSource(me);
         }
 
-        public static StringBuilder ReplaceTags(this StringBuilder me, TagLookup lookup)
+        public static StringBuilder ReplaceTags(this StringBuilder me, TagLookup lookup, TagStyle style)
         {
             StringBuilder target = new StringBuilder();
-            me.CompileTemplate()
+            me.CompileTemplate(style)
                 .ReplaceTags(target, lookup);
             return target;
         }
-        public static TextTemplate CompileTemplate(this StringBuilder me)
+        public static TextTemplate CompileTemplate(this StringBuilder me, TagStyle style)
         {
-            return TextTemplate.Compile(me.GetTextSource());
+            return TextTemplate.Compile(me.GetTextSource(), style);
         }
     }
 }

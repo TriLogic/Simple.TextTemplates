@@ -8,16 +8,16 @@ namespace Simple.TextTemplates.Extensions
         {
             return new CharArrayTextSource(me);
         }
-        public static StringBuilder ReplaceTags(this char[] me, TagLookup lookup)
+        public static StringBuilder ReplaceTags(this char[] me, TagLookup lookup, TagStyle style)
         {
             StringBuilder target = new StringBuilder();
-            TextTemplate.Compile(new CharArrayTextSource(me))
+            TextTemplate.Compile(new CharArrayTextSource(me), style)
                 .ReplaceTags(target, lookup);
             return target;
         }
-        public static TextTemplate CompileTemplate(this char[] me)
+        public static TextTemplate CompileTemplate(this char[] me, TagStyle style)
         {
-            return TextTemplate.Compile(me.GetTextSource());
+            return TextTemplate.Compile(me.GetTextSource(), style);
         }
     }
 }
