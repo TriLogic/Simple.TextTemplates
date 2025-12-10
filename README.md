@@ -6,7 +6,7 @@
 *   **"Hello ${FirstName}"** - TagStyle.StringBraces
 *   **"Hello {{FirstName}}"** - TagStyle.Handlebars
 * Tags embedded within tags to any depth
-* Escaped tags $$, $} or \{ or \} respectively
+* Escaped tags $$, $} or \\{ or \\} respectively
 * Easy to use
 * Delegate/Lambda based value lookup
 * Compiled templates for execution against single or multiple sets of data
