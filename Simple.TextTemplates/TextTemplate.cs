@@ -8,34 +8,27 @@ namespace Simple.TextTemplates
     public delegate string? TagLookup(string Key);
     #endregion
 
-    public enum TagStyle
-    {
-        StringBraces,
-        Handlebars
-    }
-
-
     public class TextTemplate
     {
         #region Class members
-        private ITextSource mSource = new StringTextSource();
-        private List<TemplateToken> mTokens = new List<TemplateToken>();
+        private ITextSource? mSource;
+        private List<TemplateToken>? mTokens;
         #endregion
 
         #region Constructors & Destructors
-        public TextTemplate()
+        internal TextTemplate()
         {
         }
         #endregion
 
         #region Internal Properties
-        internal List<TemplateToken> Tokens
+        internal List<TemplateToken>? Tokens
         {
             get { return mTokens; }
             set { mTokens = value ?? new List<TemplateToken>(); }
         }
 
-        internal ITextSource Source
+        internal ITextSource? Source
         {
             get { return mSource; }
             set { mSource = value; }
@@ -45,14 +38,13 @@ namespace Simple.TextTemplates
         #region Replace Tags
         public void ReplaceTags(StringBuilder target, TagLookup lookup)
         {
-            // moved the run stack to local to allow multiple threads
-            // of execution to access the functionality.
+            if (mTokens == null)
+            {
+                throw new Exception("Missing or invalid template");
+            }
+            
             Stack<TemplateToken> stack = new();
-
             StringBuilder keyBuilder = new StringBuilder();
-
-            // Clear the stack
-            stack.Clear();
 
             // assign a default lookup
             if (lookup == null)
@@ -163,10 +155,9 @@ namespace Simple.TextTemplates
         #endregion
 
         #region Static Compile Method
-        public static TextTemplate Compile(ITextSource source, TagStyle style = TagStyle.StringBraces)
+        public static TextTemplate Compile(ITextSource source)
         {
-            List<TemplateToken> tokens = style == TagStyle.StringBraces ? 
-                StringTagTokenizer.Tokenize(source) : HandlebarTagTokenizer.Tokenize(source);
+            List<TemplateToken> tokens = HandlebarsTagTokenizer.Tokenize(source);
             Stack<TemplateToken> stack = new Stack<TemplateToken>();
 
             foreach (TemplateToken token in tokens)

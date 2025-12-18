@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Simple.TextTemplates
 {
-    public abstract class TagTokenizer
+    public abstract class AbstractTagTokenizer
     {
         #region Class Members
         protected ITextSource? mBuf;
@@ -11,7 +11,7 @@ namespace Simple.TextTemplates
         #endregion
 
         #region Constructors and Destructors
-        public TagTokenizer(ITextSource buf)
+        public AbstractTagTokenizer(ITextSource buf)
         {
             Reset(buf);
         }
@@ -61,135 +61,10 @@ namespace Simple.TextTemplates
         #endregion
     }
 
-    public class StringTagTokenizer : TagTokenizer
+    public class HandlebarsTagTokenizer : AbstractTagTokenizer
     {
         #region Constructors and Destructors
-        public StringTagTokenizer(ITextSource buf) : base(buf) { }
-        #endregion
-
-        #region Token Retreival
-        public override TemplateToken? GetToken()
-        {
-            int offst = mIdx;
-            int chars = 0;
-
-            while (mIdx < mBuf.Length)
-            {
-                char tkc = mBuf[mIdx];
-
-                // Is it a closure? 
-                if (tkc == '}')
-                {
-                    // We have encountered a closure token but if we have chrs already consumed
-                    // we allow them to take precedence as we return a text token.
-                    if (chars > 0)
-                    {
-                        return new TemplateToken(TemplateTokenType.TkTXT, offst, chars);
-                    }
-
-                    // increment to the next char
-                    mIdx++;
-
-                    // return the closure token
-                    return new TemplateToken(TemplateTokenType.TkRHT, mIdx, 1);
-                }
-
-                // Is this an Open Token, an Escaped token or Orphan '$' ???
-                if (tkc == '$')
-                {
-                    // Is this an escaped token or a start token?
-                    if (mIdx + 1 < mBuf.Length)
-                    {
-                        // Escaped token?
-                        if (mBuf[mIdx + 1] == '$' || mBuf[mIdx + 1] == '}')
-                        {
-                            // We have encountered an escaped token but if we have chrs already consumed
-                            // we allow them to take precedence as we return a text token.
-                            if (chars > 0)
-                            {
-                                return new TemplateToken(TemplateTokenType.TkTXT, offst, chars);
-                            }
-
-                            // Increment past the escaped token
-                            mIdx += 2;
-
-                            // Return the escaped token
-                            return new TemplateToken(TemplateTokenType.TkTXT, offst, 2, true);
-                        }
-
-                        // Is it a start token?
-                        if (mBuf[mIdx + 1] == '{')
-                        {
-                            // We have encountered an escaped token but if we have chrs already consumed
-                            // we allow them to take precedence as we return a text token.
-                            if (chars > 0)
-                            {
-                                return new TemplateToken(TemplateTokenType.TkTXT, offst, chars);
-                            }
-
-                            // Increment past the start token
-                            mIdx += 2;
-
-                            // Return the start token
-                            return new TemplateToken(TemplateTokenType.TkLHT, offst, 2, false);
-                        }
-
-                        // It's just an orphaned '$' that should have been escaped!
-                        // so we let that slip on by as part of the text.
-                    }
-
-
-                    // We have encountered an escaped token but if we have chrs already consumed
-                    // we allow them to take precedence as we return a text token.
-                    if (chars > 0)
-                    {
-                        return new TemplateToken(TemplateTokenType.TkTXT, offst, chars);
-                    }
-
-                    // Move the index past the escaped tokens
-                    mIdx += 2;
-
-                    // Return the escaped token
-                    return new TemplateToken(TemplateTokenType.TkTXT, offst, 2, true);
-                }
-
-                // Process a single char, add it to the list and move on
-                chars++;
-                mIdx++;
-            }
-
-            if (chars > 0)
-            {
-                return new TemplateToken(TemplateTokenType.TkTXT, offst, chars);
-            }
-
-            // No more tokens
-            return null;
-        }
-
-        public static List<TemplateToken> Tokenize(ITextSource pattern)
-        {
-            return new StringTagTokenizer(pattern).GetTokens();
-        }
-        public static List<TemplateToken> Tokenize(string pattern)
-        {
-            return new StringTagTokenizer(new StringTextSource(pattern)).GetTokens();
-        }
-        public static List<TemplateToken> Tokenize(StringBuilder pattern)
-        {
-            return new StringTagTokenizer(new StringBuilderTextSource(pattern)).GetTokens();
-        }
-        public static List<TemplateToken> Tokenize(char[] pattern)
-        {
-            return new StringTagTokenizer(new CharArrayTextSource(pattern)).GetTokens();
-        }
-        #endregion
-    }
-
-    public class HandlebarTagTokenizer : TagTokenizer
-    {
-        #region Constructors and Destructors
-        public HandlebarTagTokenizer(ITextSource buf) : base(buf) { }
+        public HandlebarsTagTokenizer(ITextSource buf) : base(buf) { }
         #endregion
 
         #region Token Retreival
@@ -271,22 +146,21 @@ namespace Simple.TextTemplates
 
         public static List<TemplateToken> Tokenize(ITextSource pattern)
         {
-            return new HandlebarTagTokenizer(pattern).GetTokens();
+            return new HandlebarsTagTokenizer(pattern).GetTokens();
         }
         public static List<TemplateToken> Tokenize(string pattern)
         {
-            return new HandlebarTagTokenizer(new StringTextSource(pattern)).GetTokens();
+            return new HandlebarsTagTokenizer(new StringTextSource(pattern)).GetTokens();
         }
         public static List<TemplateToken> Tokenize(StringBuilder pattern)
         {
-            return new HandlebarTagTokenizer(new StringBuilderTextSource(pattern)).GetTokens();
+            return new HandlebarsTagTokenizer(new StringBuilderTextSource(pattern)).GetTokens();
         }
         public static List<TemplateToken> Tokenize(char[] pattern)
         {
-            return new HandlebarTagTokenizer(new CharArrayTextSource(pattern)).GetTokens();
+            return new HandlebarsTagTokenizer(new CharArrayTextSource(pattern)).GetTokens();
         }
         #endregion
     }
-
 
 }

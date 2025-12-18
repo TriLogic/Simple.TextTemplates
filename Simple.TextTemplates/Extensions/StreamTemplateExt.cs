@@ -10,14 +10,14 @@ namespace Simple.TextTemplates.Extensions
             return new StreamReader(me)
                 .GetTextSource();
         }
-        public static StringBuilder ReplaceTags(this Stream me, TagLookup lookup, TagStyle style)
+        public static StringBuilder ReplaceTags(this Stream me, TagLookup lookup)
         {
-            return new StreamReader(me).ReplaceTags(lookup, style);
+            return new StreamReader(me).ReplaceTags(lookup);
         }
 
-        public static TextTemplate CompileTemplate(this Stream me, TagStyle style)
+        public static TextTemplate CompileTextTemplate(this Stream me)
         {
-            return TextTemplate.Compile(me.GetTextSource(), style);
+            return TextTemplate.Compile(me.GetTextSource());
         }
     }
 }

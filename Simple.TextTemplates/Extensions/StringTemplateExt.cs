@@ -9,17 +9,17 @@ namespace Simple.TextTemplates.Extensions
         {
             return new StringTextSource(me);
         }
-        public static StringBuilder ReplaceTags(this string me, TagLookup lookup, TagStyle style)
+        public static StringBuilder ReplaceTags(this string me, TagLookup lookup)
         {
             StringBuilder target = new StringBuilder();
-            me.CompileTemplate(style)
+            me.CompileTextTemplate()
                 .ReplaceTags(target, lookup);
             return target;
         }
 
-        public static TextTemplate CompileTemplate(this string me, TagStyle style) 
+        public static TextTemplate CompileTextTemplate(this string me) 
         {
-            return TextTemplate.Compile(me.GetTextSource(), style);
+            return TextTemplate.Compile(me.GetTextSource());
         }
     }
 }
